@@ -1,0 +1,35 @@
+{
+  "secret_id": "YOUR_SECRET_ID_HERE",
+  "secret_key": "YOUR_SECRET_KEY_HERE",
+  "region": "ap-guangzhou",
+  "instance_id": "lhins-xxxxxxxx",
+  "managed_rules": [
+    {
+      "protocol": "TCP",
+      "port": "8000",
+      "action": "ACCEPT",
+      "description": "auto-ip-sync 8000"
+    },
+    {
+      "protocol": "TCP",
+      "port": "3002",
+      "action": "ACCEPT",
+      "description": "auto-ip-sync 3002"
+    },
+    {
+      "protocol": "TCP",
+      "port": "8080",
+      "action": "ACCEPT",
+      "description": "auto-ip-sync 8080"
+    }
+  ],
+  "ip_check_urls": [
+    "https://api.ipify.org",
+    "https://checkip.amazonaws.com",
+    "https://ifconfig.me/ip"
+  ],
+  "request_timeout_seconds": 10,
+  "state_file": "/Users/qiwang/project/project_shell/tencent_lighthouse_ip_sync.state.json",
+  "log_file": "/Users/qiwang/project/project_shell/tencent_lighthouse_ip_sync.log",
+  "dry_run": false
+}

@@ -1,0 +1,11 @@
+# Config with secrets
+tencent_lighthouse_ip_sync.json
+
+# State file
+tencent_lighthouse_ip_sync.state.json
+
+# Logs
+*.log
+
+# Python cache
+__pycache__/
