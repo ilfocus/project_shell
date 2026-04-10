@@ -15,6 +15,7 @@ import ipaddress
 import json
 import logging
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -29,11 +30,11 @@ API_SERVICE = "lighthouse"
 API_VERSION = "2020-03-24"
 API_ENDPOINT = f"https://{API_HOST}"
 DEFAULT_IP_CHECK_URLS = [
-    "https://api.ipify.org",
-    "https://checkip.amazonaws.com",
+    "https://api4.ipify.org",
+    "https://www.ip138.com/",
+    "https://ipv4.icanhazip.com",
+    "https://4.ident.me",
     "https://ifconfig.me/ip",
-    "https://icanhazip.com",
-    "https://ident.me",
 ]
 
 
@@ -141,6 +142,24 @@ def validate_config(raw: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+_IP_RE = re.compile(r"(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)")
+
+
+def _extract_ip(body: str) -> str:
+    """Parse an IPv4 address from plain text or extract the first valid IPv4 from HTML."""
+    stripped = body.strip()
+    try:
+        addr = ipaddress.ip_address(stripped)
+        if addr.version == 4:
+            return str(addr)
+    except ValueError:
+        pass
+    match = _IP_RE.search(stripped)
+    if match:
+        return str(ipaddress.ip_address(match.group()))
+    raise ValueError(f"No valid IP found in response ({len(stripped)} chars)")
+
+
 def fetch_public_ip(ip_check_urls: list[str], timeout_seconds: int) -> str:
     headers = {"User-Agent": "Mozilla/5.0 ip-sync-script"}
     last_error: Exception | None = None
@@ -150,8 +169,8 @@ def fetch_public_ip(ip_check_urls: list[str], timeout_seconds: int) -> str:
             try:
                 request = urllib.request.Request(url, headers=headers)
                 with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
-                    body = response.read().decode("utf-8").strip()
-                ip = str(ipaddress.ip_address(body))
+                    body = response.read().decode("utf-8")
+                ip = _extract_ip(body)
                 logging.info("Current public IP detected as %s via %s", ip, url)
                 return ip
             except Exception as exc:  # noqa: BLE001
