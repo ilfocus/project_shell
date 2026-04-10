@@ -62,9 +62,12 @@ def build_parser() -> argparse.ArgumentParser:
 def setup_logging(log_file: str | None) -> None:
     handlers: list[logging.Handler] = [logging.StreamHandler(sys.stdout)]
     if log_file:
-        log_path = Path(log_file).expanduser()
-        log_path.parent.mkdir(parents=True, exist_ok=True)
-        handlers.append(logging.FileHandler(log_path, encoding="utf-8"))
+        log_path = Path(log_file).expanduser().resolve()
+        try:
+            log_path.parent.mkdir(parents=True, exist_ok=True)
+            handlers.append(logging.FileHandler(log_path, encoding="utf-8"))
+        except (PermissionError, OSError) as exc:
+            print(f"Warning: Could not create log file at {log_path}: {exc}", file=sys.stderr)
 
     logging.basicConfig(
         level=logging.INFO,
